@@ -172,8 +172,13 @@ storage = datapackage.push_datapackage(data_url, 'pandas')
 storage.buckets
 
 # you can access datasets inside storage, e.g. the first one:
-storage[storage.buckets[0]]
+storage[storage.buckets[1]]
 
+spdata = pd.DataFrame(storage[storage.buckets[0]][["SP500","PE10"]])
+spdata.index =(storage[storage.buckets[0]]["Date"])
+
+plt.plot(spdata)
+plt.plot(spdata.PE10)
 
 
 #plt.close()
