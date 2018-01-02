@@ -67,7 +67,9 @@ ea_adjclose = pd.Series(EA_prices.adj_close)
 ea_adjclose_norm = ea_adjclose/ea_adjclose[len(ea_adjclose)-1]*100
 ea_adjclose_norm = ea_adjclose_norm.rename("EA")
 
-
+ea_adjclose_norm_11y = ea_adjclose[:"2007-01-03"]/ea_adjclose["2007-01-03"][0]*100
+spy_adjclose_norm_11y = spy_adjclose[:"2007-01-03"]/spy_adjclose["2007-01-03"][0]*100
+atvi_adjclose_norm_11y = atvi_adjclose[:"2007-01-03"]/atvi_adjclose["2007-01-03"][0]*100
 
 
 
@@ -82,13 +84,25 @@ ATVI_EA_15corr.describe()
 
 
 ATVI_EA_mtl_corr = pd.rolling_corr(atvi_adjclose_norm.resample("M").mean(),
-                                   ea_adjclose_norm.resample("M").mean(), 4)
+                                   ea_adjclose_norm.resample("M").mean(), 3)
 ATVI_EA_mtl_corr.describe()
 
 
 ATVI_SPY_mtl_corr = pd.rolling_corr(atvi_adjclose_norm.resample("M").mean(),
-                                   spy_adjclose_norm.resample("M").mean(), 12)
+                                   spy_adjclose_norm.resample("M").mean(), 6)
 ATVI_SPY_mtl_corr.describe()
+
+
+
+ATVI_EA_11y_mtl_corr = pd.rolling_corr(atvi_adjclose_norm_11y.resample("W").mean(),
+                                   ea_adjclose_norm_11y.resample("W").mean(), 15)
+ATVI_EA_11y_mtl_corr.describe()
+
+
+ATVI_SPY_11y_mtl_corr = pd.rolling_corr(atvi_adjclose_norm_11y.resample("W").mean(),
+                                   spy_adjclose_norm_11y.resample("W").mean(), 40)
+ATVI_SPY_11y_mtl_corr.describe()
+
 
 
 plt.figure()
@@ -98,6 +112,9 @@ plt.plot(ea_adjclose_norm)
 #plt.plot(ATVI_SPY_15corr)
 plt.legend()
 
+
+
+#plot von 1993
 
 fig = plt.figure()
 gs = gridspec.GridSpec(3, 1)# width_ratios=[3])
@@ -120,4 +137,43 @@ plt.show()
 
 
 
-plt.close()
+#plot nur 11 jahre
+
+fig = plt.figure()
+gs = gridspec.GridSpec(3, 1)# width_ratios=[3])
+ax1 = plt.subplot2grid((3,1), (0,0), rowspan=2)
+ax2 = plt.subplot2grid((3,1), (2,0), sharex=ax1)
+
+spy_adjclose_norm_11y.resample("W").mean().plot(ax=ax1, label="S&P500")
+atvi_adjclose_norm_11y.resample("W").mean().plot(ax=ax1, label="ATVI")
+ea_adjclose_norm_11y.resample("W").mean().plot(ax=ax1, label="EA")
+
+
+ATVI_EA_11y_mtl_corr.plot(ax=ax2, label="ATVI to EA 12 week correlation")
+ATVI_SPY_11y_mtl_corr.plot(ax=ax2, label="ATVI to S&P500 26 week correlation")
+
+ax1.legend(loc=1)
+ax2.legend()
+
+plt.show()
+
+
+
+
+#datahub data
+import datapackage
+
+data_url = "http://datahub.io/core/s-and-p-500/datapackage.json"
+
+# to load Data Package into storage
+storage = datapackage.push_datapackage(data_url, 'pandas')
+
+# data frames available (corresponding to data files in original dataset)
+storage.buckets
+
+# you can access datasets inside storage, e.g. the first one:
+storage[storage.buckets[0]]
+
+
+
+#plt.close()
